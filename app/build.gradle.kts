@@ -19,9 +19,20 @@ android {
         versionName = "1.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+
+        // URL por defecto (producción - HostGator)
+        // ┌─────────────────────────────────────────────────────────────────┐
+        // │ CAMBIA "tudominio.com" POR TU DOMINIO REAL DE HOSTGATOR        │
+        // │ Ejemplo: "https://midominio.com/huellitas/"                    │
+        // └─────────────────────────────────────────────────────────────────┘
+        buildConfigField("String", "BASE_URL", "\"https://webculmapp.com/huellitas/\"")
     }
 
     buildTypes {
+        debug {
+            // En debug usa el servidor local XAMPP (emulador: 10.0.2.2 / físico: tu IP local)
+            buildConfigField("String", "BASE_URL", "\"http://10.0.2.2/huellitas/\"")
+        }
         release {
             isMinifyEnabled = false
             proguardFiles(
@@ -36,6 +47,7 @@ android {
     }
     buildFeatures {
         compose = true
+        buildConfig = true
     }
 }
 
@@ -52,6 +64,15 @@ dependencies {
     implementation(libs.androidx.compose.material.icons.extended)
     implementation(libs.lottie.compose)
     implementation(libs.coil.compose)
+    implementation(libs.retrofit.core)
+    implementation(libs.retrofit.converter.gson)
+    implementation(libs.okhttp.logging)
+    implementation(libs.lifecycle.viewmodel.compose)
+    implementation(libs.kotlinx.coroutines.android)
+    implementation(libs.camera.core)
+    implementation(libs.camera.camera2)
+    implementation(libs.camera.lifecycle)
+    implementation(libs.camera.view)
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
