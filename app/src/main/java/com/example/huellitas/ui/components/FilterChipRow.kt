@@ -24,7 +24,9 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.example.huellitas.model.OpcionFiltro
 import com.example.huellitas.ui.theme.HuellitasTheme
+import java.util.Calendar
 import java.util.Date
+import java.util.TimeZone
 
 /**
  * Fila horizontal con chips de filtro para ordenar la lista de animales.
@@ -65,7 +67,8 @@ fun FilaChipsFiltro(
 
             // Etiqueta especial para "Por fecha" cuando hay fecha seleccionada
             val etiqueta = if (opcion == OpcionFiltro.POR_FECHA && estaSeleccionado && fechaSeleccionada != null) {
-                DateFormat.format("dd MMM yyyy", Date(fechaSeleccionada)).toString()
+                val cal = Calendar.getInstance(TimeZone.getTimeZone("UTC")).apply { timeInMillis = fechaSeleccionada }
+                DateFormat.format("dd MMM yyyy", cal).toString()
             } else {
                 opcion.etiqueta
             }

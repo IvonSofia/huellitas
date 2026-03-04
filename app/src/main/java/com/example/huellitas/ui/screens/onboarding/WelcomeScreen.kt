@@ -197,7 +197,7 @@ fun PantallaBienvenida(alSiguiente: () -> Unit) {
 
                     // Imagen 2: Perrito (derecha)
                     Image(
-                        painter = painterResource(id = R.drawable.pet_dog_1),
+                        painter = painterResource(id = R.drawable.pet_dog_2),
                         contentDescription = "Perrito callejero",
                         modifier = Modifier
                             .size(150.dp)

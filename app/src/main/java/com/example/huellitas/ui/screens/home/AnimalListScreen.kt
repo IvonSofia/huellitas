@@ -78,6 +78,7 @@ import com.example.huellitas.viewmodel.AnimalListViewModel
 import com.example.huellitas.viewmodel.EstadoListaAnimales
 import kotlinx.coroutines.launch
 import java.util.Calendar
+import java.util.TimeZone
 import java.util.Date
 
 /**
@@ -217,7 +218,8 @@ fun PantallaListaAnimales(
                 is EstadoListaAnimales.Exito -> {
                     // ── Contador de resultados ──
                     val textoContador = if (filtroActual == OpcionFiltro.POR_FECHA && fechaSeleccionada != null) {
-                        val fechaTexto = DateFormat.format("dd MMM yyyy", Date(fechaSeleccionada!!)).toString()
+                        val cal = Calendar.getInstance(TimeZone.getTimeZone("UTC")).apply { timeInMillis = fechaSeleccionada!! }
+                        val fechaTexto = DateFormat.format("dd MMMM yyyy", cal).toString()
                         "${animalesFiltrados.size} animales el $fechaTexto"
                     } else {
                         "${animalesFiltrados.size} animales encontrados"
@@ -328,7 +330,7 @@ private fun cuando(
     OpcionFiltro.ANTIGUOS -> lista.sortedBy { it.fechaRegistro }
     OpcionFiltro.POR_FECHA -> {
         if (fechaMs != null) {
-            val calendarioSeleccionado = Calendar.getInstance().apply { timeInMillis = fechaMs }
+            val calendarioSeleccionado = Calendar.getInstance(TimeZone.getTimeZone("UTC")).apply { timeInMillis = fechaMs }
             lista.filter { animal ->
                 val c = Calendar.getInstance().apply { time = animal.fechaRegistro }
                 c.get(Calendar.YEAR) == calendarioSeleccionado.get(Calendar.YEAR) &&
