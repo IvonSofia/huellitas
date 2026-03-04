@@ -1,0 +1,33 @@
+# ══════════════════════════════════════════════════════════════
+# .htaccess principal - Carpeta raíz de Huellitas
+# Seguridad y configuración general para HostGator / Apache
+# ══════════════════════════════════════════════════════════════
+
+# Desactivar listado de directorios (que no se vean los archivos)
+Options -Indexes
+
+# Proteger archivos sensibles: env.php, Database.php, .htaccess, .txt
+<FilesMatch "\.(env|htaccess|txt)$">
+    Require all denied
+</FilesMatch>
+
+# Denegar acceso directo a la carpeta config/ y models/ desde el navegador
+# (Solo se pueden acceder internamente vía require/include de PHP)
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+
+    # Bloquear acceso directo a carpetas internas
+    RewriteRule ^config/ - [F,L]
+    RewriteRule ^models/ - [F,L]
+    RewriteRule ^helpers/ - [F,L]
+    RewriteRule ^database/ - [F,L]
+</IfModule>
+
+# Configurar headers de seguridad
+<IfModule mod_headers.c>
+    Header set X-Content-Type-Options "nosniff"
+    Header set X-Frame-Options "DENY"
+</IfModule>
+
+# Forzar UTF-8 en respuestas PHP
+AddDefaultCharset UTF-8
