@@ -1,22 +1,28 @@
 package com.example.huellitas.ui.components
 
+import android.content.Intent
+import android.net.Uri
 import android.text.format.DateFormat
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.CalendarToday
 import androidx.compose.material.icons.outlined.LocationOn
 import androidx.compose.material.icons.outlined.Pets
 import androidx.compose.material.icons.outlined.Phone
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.HorizontalDivider
@@ -52,6 +58,9 @@ import com.example.huellitas.ui.theme.HuellitasTheme
 import com.example.huellitas.ui.theme.PurpleDark
 import java.util.Date
 
+/** Número de contacto WhatsApp de Huellitas a Salvo */
+private const val WHATSAPP_NUMERO = "573203717031"
+
 /**
  * Tarjeta de animal con imagen cargada mediante Coil,
  * badge de tipo, y disposición organizada de la información.
@@ -70,6 +79,7 @@ fun TarjetaAnimal(
     modifier: Modifier = Modifier
 ) {
     var mostrarZoom by remember { mutableStateOf(false) }
+    val contexto = LocalContext.current
 
     // Diálogo de zoom a pantalla completa
     if (mostrarZoom && animal.imagenUrl != null) {
@@ -211,6 +221,38 @@ fun TarjetaAnimal(
                     texto = DateFormat.format("dd MMM yyyy", animal.fechaRegistro).toString(),
                     descripcionContenido = "Fecha de registro"
                 )
+
+                // ── Botón Contactar por WhatsApp ──
+                Spacer(modifier = Modifier.height(4.dp))
+
+                Button(
+                    onClick = {
+                        val nombre = animal.nombre.ifEmpty { "Animal sin nombre" }
+                        val mensaje = "Hola, vi a *$nombre* en la app Huellitas a Salvo " +
+                                "y me gustaría ayudar. Fue visto en ${animal.ubicacion}."
+                        val url = "https://wa.me/$WHATSAPP_NUMERO?text=${Uri.encode(mensaje)}"
+                        contexto.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(url)))
+                    },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(48.dp),
+                    shape = RoundedCornerShape(12.dp),
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = Color(0xFF25D366),
+                        contentColor = Color.White
+                    )
+                ) {
+                    Icon(
+                        imageVector = Icons.Outlined.Phone,
+                        contentDescription = null,
+                        modifier = Modifier.size(20.dp)
+                    )
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Text(
+                        text = "Contactar por WhatsApp",
+                        fontWeight = FontWeight.SemiBold
+                    )
+                }
             }
         }
     }

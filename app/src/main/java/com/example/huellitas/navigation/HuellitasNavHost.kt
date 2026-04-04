@@ -6,13 +6,19 @@ import androidx.compose.animation.fadeOut
 import androidx.compose.animation.slideInHorizontally
 import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
+import com.example.huellitas.ui.screens.admin.PantallaAdminPanel
+import com.example.huellitas.ui.screens.admin.PantallaLoginAdmin
+import com.example.huellitas.ui.screens.admin.PantallaTutorialAdmin
 import com.example.huellitas.ui.screens.home.PantallaListaAnimales
 import com.example.huellitas.ui.screens.onboarding.PantallaBienvenida
 import com.example.huellitas.ui.screens.onboarding.PantallaIntroduccion
+import com.example.huellitas.ui.screens.onboarding.PantallaTutorial
 import com.example.huellitas.ui.screens.registration.PantallaRegistroAnimal
 import com.example.huellitas.ui.screens.splash.PantallaCarga
 import com.example.huellitas.viewmodel.AnimalListViewModel
@@ -42,6 +48,9 @@ fun NavHostHuellitas(
     // ViewModel compartido: la pantalla de lista y el callback de registro
     // comparten la misma instancia para que al registrar se recargue la lista.
     val listViewModel: AnimalListViewModel = viewModel()
+
+    // Estado para controlar si ya se vio el tutorial de admin
+    val tutorialAdminVisto = rememberSaveable { mutableStateOf(false) }
 
     NavHost(
         navController = controladorNav,
@@ -120,7 +129,19 @@ fun NavHostHuellitas(
         composable(Rutas.INICIO) {
             PantallaListaAnimales(
                 alNavegarARegistro = { controladorNav.navigate(Rutas.REGISTRAR_ANIMAL) },
+                alNavegarATutorial = { controladorNav.navigate(Rutas.TUTORIAL) },
+                alNavegarAAdmin = { controladorNav.navigate(Rutas.ADMIN_LOGIN) },
                 viewModel = listViewModel
+            )
+        }
+
+        composable(Rutas.TUTORIAL) {
+            PantallaTutorial(
+                alFinalizar = {
+                    controladorNav.popBackStack()
+                    controladorNav.navigate(Rutas.REGISTRAR_ANIMAL)
+                },
+                alRegresar = { controladorNav.popBackStack() }
             )
         }
 
@@ -130,6 +151,52 @@ fun NavHostHuellitas(
                     controladorNav.popBackStack()
                     // Recargar la lista en segundo plano al volver del registro
                     listViewModel.refrescar()
+                }
+            )
+        }
+
+        // ── Flujo de administración ─────────────────────────────────
+
+        composable(Rutas.ADMIN_LOGIN) {
+            PantallaLoginAdmin(
+                alIniciarSesion = {
+                    if (!tutorialAdminVisto.value) {
+                        // Primera vez: mostrar tutorial
+                        controladorNav.navigate(Rutas.ADMIN_TUTORIAL) {
+                            popUpTo(Rutas.ADMIN_LOGIN) { inclusive = true }
+                        }
+                    } else {
+                        // Ya vio el tutorial: ir directo al panel
+                        controladorNav.navigate(Rutas.ADMIN_PANEL) {
+                            popUpTo(Rutas.ADMIN_LOGIN) { inclusive = true }
+                        }
+                    }
+                },
+                alVolver = { controladorNav.popBackStack() }
+            )
+        }
+
+        composable(Rutas.ADMIN_TUTORIAL) {
+            PantallaTutorialAdmin(
+                alFinalizar = {
+                    tutorialAdminVisto.value = true
+                    controladorNav.navigate(Rutas.ADMIN_PANEL) {
+                        popUpTo(Rutas.ADMIN_TUTORIAL) { inclusive = true }
+                    }
+                },
+                alRegresar = {
+                    controladorNav.popBackStack()
+                    controladorNav.navigate(Rutas.ADMIN_LOGIN)
+                }
+            )
+        }
+
+        composable(Rutas.ADMIN_PANEL) {
+            PantallaAdminPanel(
+                alCerrarSesion = {
+                    controladorNav.navigate(Rutas.INICIO) {
+                        popUpTo(Rutas.ADMIN_PANEL) { inclusive = true }
+                    }
                 }
             )
         }

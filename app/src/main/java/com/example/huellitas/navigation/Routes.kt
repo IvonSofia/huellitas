@@ -15,5 +15,11 @@ object Rutas {
 
     // ── Aplicación principal ──
     const val INICIO = "inicio"
+    const val TUTORIAL = "tutorial"
     const val REGISTRAR_ANIMAL = "registrar_animal"
+
+    // ── Flujo de administración ──
+    const val ADMIN_LOGIN = "admin_login"
+    const val ADMIN_TUTORIAL = "admin_tutorial"
+    const val ADMIN_PANEL = "admin_panel"
 }

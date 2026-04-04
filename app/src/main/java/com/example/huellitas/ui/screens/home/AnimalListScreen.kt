@@ -24,8 +24,10 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Add
+import androidx.compose.material.icons.outlined.Lock
 import androidx.compose.material.icons.outlined.Pets
 import androidx.compose.material.icons.outlined.Refresh
+import androidx.compose.material.icons.outlined.School
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CircularProgressIndicator
@@ -36,8 +38,10 @@ import androidx.compose.material3.ExtendedFloatingActionButton
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.FilterChipDefaults
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
@@ -86,12 +90,16 @@ import java.util.Date
  * con opciones de filtrado y ordenamiento.
  *
  * @param alNavegarARegistro Callback para navegar al formulario de registro
+ * @param alNavegarATutorial Callback para navegar a la pantalla de tutorial
+ * @param alNavegarAAdmin Callback para navegar al login de administración
  * @param viewModel ViewModel que provee los datos desde la API
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun PantallaListaAnimales(
     alNavegarARegistro: () -> Unit,
+    alNavegarATutorial: () -> Unit = {},
+    alNavegarAAdmin: () -> Unit = {},
     viewModel: AnimalListViewModel = viewModel()
 ) {
     val estadoActual by viewModel.estado.collectAsState()
@@ -160,7 +168,41 @@ fun PantallaListaAnimales(
                 colors = TopAppBarDefaults.topAppBarColors(
                     containerColor = GradientStart,
                     titleContentColor = Color.White
-                )
+                ),
+                actions = {
+                    IconButton(onClick = alNavegarATutorial) {
+                        Icon(
+                            imageVector = Icons.Outlined.School,
+                            contentDescription = "Ver tutorial",
+                            tint = Color.White
+                        )
+                    }
+                    Surface(
+                        onClick = alNavegarAAdmin,
+                        shape = RoundedCornerShape(20.dp),
+                        color = Color.White.copy(alpha = 0.2f),
+                        modifier = Modifier.padding(end = 8.dp)
+                    ) {
+                        Row(
+                            modifier = Modifier.padding(horizontal = 10.dp, vertical = 6.dp),
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(4.dp)
+                        ) {
+                            Icon(
+                                imageVector = Icons.Outlined.Lock,
+                                contentDescription = null,
+                                modifier = Modifier.size(14.dp),
+                                tint = Color(0xFFFFD700)
+                            )
+                            Text(
+                                text = "Admin",
+                                style = MaterialTheme.typography.labelSmall,
+                                fontWeight = FontWeight.SemiBold,
+                                color = Color.White
+                            )
+                        }
+                    }
+                }
             )
         },
         floatingActionButton = {
