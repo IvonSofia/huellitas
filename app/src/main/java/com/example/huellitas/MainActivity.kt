@@ -21,6 +21,9 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
+        // Desactivar Force Dark del sistema (Xiaomi/MIUI/Samsung)
+        // para que no invierta los colores de la app
+        window.decorView.isForceDarkAllowed = false
         setContent {
             HuellitasTheme {
                 ContenidoPrincipal()

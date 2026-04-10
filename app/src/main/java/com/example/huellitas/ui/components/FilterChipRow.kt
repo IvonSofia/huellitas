@@ -10,8 +10,8 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.CalendarMonth
-import androidx.compose.material.icons.outlined.TrendingDown
-import androidx.compose.material.icons.outlined.TrendingUp
+import androidx.compose.material.icons.automirrored.outlined.TrendingDown
+import androidx.compose.material.icons.automirrored.outlined.TrendingUp
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.FilterChipDefaults
@@ -60,9 +60,9 @@ fun FilaChipsFiltro(
             val estaSeleccionado = opcion == filtroActual
 
             val icono = when (opcion) {
-                OpcionFiltro.RECIENTES -> Icons.Outlined.TrendingUp
+                OpcionFiltro.RECIENTES -> Icons.AutoMirrored.Outlined.TrendingUp
                 OpcionFiltro.POR_FECHA -> Icons.Outlined.CalendarMonth
-                OpcionFiltro.ANTIGUOS -> Icons.Outlined.TrendingDown
+                OpcionFiltro.ANTIGUOS -> Icons.AutoMirrored.Outlined.TrendingDown
             }
 
             // Etiqueta especial para "Por fecha" cuando hay fecha seleccionada

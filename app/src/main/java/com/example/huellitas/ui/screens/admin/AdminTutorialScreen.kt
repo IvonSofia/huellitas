@@ -18,11 +18,11 @@ import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.outlined.Send
 import androidx.compose.material.icons.outlined.Check
 import androidx.compose.material.icons.outlined.Email
 import androidx.compose.material.icons.outlined.Forum
 import androidx.compose.material.icons.outlined.RemoveRedEye
-import androidx.compose.material.icons.outlined.Send
 import androidx.compose.material.icons.outlined.Settings
 import androidx.compose.material.icons.outlined.Sync
 import androidx.compose.material3.Button
@@ -112,7 +112,7 @@ private val pasosAdmin = listOf(
         )
     ),
     PasoAdmin(
-        icono = Icons.Outlined.Send,
+        icono = Icons.AutoMirrored.Outlined.Send,
         colorFondo = Color(0xFFD6E4FF),
         titulo = "5. Derivar a Instituciones",
         descripcion = "Envía casos a veterinarias, refugios o autoridades directamente por WhatsApp con toda la información.",

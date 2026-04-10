@@ -3,6 +3,9 @@ package com.example.huellitas.network
 import com.example.huellitas.network.dto.AnimalDto
 import com.example.huellitas.network.dto.ApiResponse
 import com.example.huellitas.network.dto.CrearAnimalRequest
+import com.example.huellitas.network.dto.LoginRequest
+import com.example.huellitas.network.dto.RegistroUsuarioRequest
+import com.example.huellitas.network.dto.UsuarioDto
 import okhttp3.MultipartBody
 import okhttp3.RequestBody
 import retrofit2.Response
@@ -49,4 +52,16 @@ interface ApiService {
         @Part imagen: MultipartBody.Part,
         @Part("id_animal") idAnimal: RequestBody? = null
     ): Response<ApiResponse<Map<String, String>>>
+
+    // ── Autenticación ──
+
+    @POST("api/auth/login.php")
+    suspend fun login(
+        @Body request: LoginRequest
+    ): Response<ApiResponse<UsuarioDto>>
+
+    @POST("api/auth/registrar.php")
+    suspend fun registrarUsuario(
+        @Body request: RegistroUsuarioRequest
+    ): Response<ApiResponse<UsuarioDto>>
 }

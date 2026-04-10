@@ -20,6 +20,7 @@ object Rutas {
 
     // ── Flujo de administración ──
     const val ADMIN_LOGIN = "admin_login"
+    const val ADMIN_REGISTRO = "admin_registro"
     const val ADMIN_TUTORIAL = "admin_tutorial"
     const val ADMIN_PANEL = "admin_panel"
 }

@@ -2,6 +2,7 @@
 -- SCRIPT SQL - BASE DE DATOS HUELLITAS
 -- Normalizado hasta la Tercera Forma Normal (3FN)
 -- Motor: MySQL / MariaDB (XAMPP)
+-- Orden de creación: tablas padre antes que tablas hija
 -- ============================================================
 
 -- Crear la base de datos
@@ -10,6 +11,42 @@ CREATE DATABASE IF NOT EXISTS huellitas_db
     COLLATE utf8mb4_unicode_ci;
 
 USE huellitas_db;
+
+-- ============================================================
+-- TABLA: roles
+-- Catálogo de roles de usuario (Admin, etc.)
+-- Justificación 3FN: Se extrae como tabla independiente para
+-- eliminar dependencias transitivas.
+-- ============================================================
+CREATE TABLE roles (
+    id          INT AUTO_INCREMENT PRIMARY KEY,
+    nombre      VARCHAR(50) NOT NULL UNIQUE,
+    descripcion VARCHAR(255) NULL,
+    created_at  TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+) ENGINE=InnoDB;
+
+-- ============================================================
+-- TABLA: usuarios
+-- Usuarios del sistema con autenticación
+-- 1FN: Todos los campos son atómicos, sin grupos repetitivos.
+-- 2FN: Clave primaria simple (id), no hay dependencias parciales.
+-- 3FN: rol_id es FK a tabla roles, eliminando dependencias
+--       transitivas.
+-- ============================================================
+CREATE TABLE usuarios (
+    id          INT AUTO_INCREMENT PRIMARY KEY,
+    nombre      VARCHAR(100) NOT NULL,
+    apellidos   VARCHAR(100) NOT NULL,
+    correo      VARCHAR(255) NOT NULL UNIQUE,
+    password    VARCHAR(255) NOT NULL COMMENT 'Hash bcrypt de la contraseña',
+    rol_id      INT NOT NULL DEFAULT 1,
+    created_at  TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at  TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+
+    CONSTRAINT fk_usuario_rol
+        FOREIGN KEY (rol_id) REFERENCES roles(id)
+        ON DELETE RESTRICT ON UPDATE CASCADE
+) ENGINE=InnoDB;
 
 -- ============================================================
 -- TABLA: tipos_animal
@@ -41,8 +78,8 @@ CREATE TABLE estados_animal (
 -- Tabla principal de animales registrados
 -- 1FN: Todos los campos son atómicos, sin grupos repetitivos.
 -- 2FN: Clave primaria simple (id), no hay dependencias parciales.
--- 3FN: tipo e estado son FK a tablas catálogo, eliminando
---       dependencias transitivas.
+-- 3FN: tipo, estado y usuario son FK a tablas catálogo/usuarios,
+--       eliminando dependencias transitivas.
 -- ============================================================
 CREATE TABLE animales (
     id              INT AUTO_INCREMENT PRIMARY KEY,
@@ -53,6 +90,7 @@ CREATE TABLE animales (
     ubicacion       VARCHAR(255) NOT NULL COMMENT 'Última ubicación conocida',
     contacto        VARCHAR(255) NOT NULL COMMENT 'Datos de contacto de quien registra',
     id_estado       INT NOT NULL DEFAULT 1,
+    id_usuario      INT NULL COMMENT 'NULL = registrado por usuario público, valor = admin autenticado',
     fecha_registro  TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at      TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
 
@@ -62,7 +100,11 @@ CREATE TABLE animales (
 
     CONSTRAINT fk_animal_estado
         FOREIGN KEY (id_estado) REFERENCES estados_animal(id)
-        ON DELETE RESTRICT ON UPDATE CASCADE
+        ON DELETE RESTRICT ON UPDATE CASCADE,
+
+    CONSTRAINT fk_animal_usuario
+        FOREIGN KEY (id_usuario) REFERENCES usuarios(id)
+        ON DELETE SET NULL ON UPDATE CASCADE
 ) ENGINE=InnoDB;
 
 -- ============================================================
@@ -86,14 +128,26 @@ CREATE TABLE imagenes_animal (
 -- ============================================================
 -- ÍNDICES para optimizar consultas frecuentes
 -- ============================================================
+CREATE INDEX idx_usuarios_correo ON usuarios(correo);
+CREATE INDEX idx_usuarios_rol ON usuarios(rol_id);
 CREATE INDEX idx_animales_tipo ON animales(id_tipo_animal);
 CREATE INDEX idx_animales_estado ON animales(id_estado);
+CREATE INDEX idx_animales_usuario ON animales(id_usuario);
 CREATE INDEX idx_animales_fecha ON animales(fecha_registro);
 CREATE INDEX idx_imagenes_animal ON imagenes_animal(id_animal);
 
 -- ============================================================
 -- DATOS INICIALES (Catálogos)
 -- ============================================================
+
+-- Roles de usuario
+INSERT INTO roles (nombre, descripcion) VALUES
+    ('Admin', 'Administrador con acceso completo al panel de gestión');
+
+-- Usuario administrador por defecto (contraseña: admin)
+-- Hash generado con: password_hash('admin', PASSWORD_BCRYPT)
+INSERT INTO usuarios (nombre, apellidos, correo, password, rol_id) VALUES
+    ('Admin', 'Sistema', 'admin@gmail.com', '$2y$10$XqOFszZtKYgB2Kbv9/1a0OMaacEyfOpM5n1r.f8dn3tU6MffGoO0W', 1);
 
 -- Tipos de animal
 INSERT INTO tipos_animal (nombre) VALUES

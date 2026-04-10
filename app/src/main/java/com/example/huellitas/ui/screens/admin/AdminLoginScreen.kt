@@ -20,13 +20,17 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
+import androidx.compose.material3.LocalTextStyle
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -35,6 +39,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
@@ -44,28 +49,63 @@ import androidx.compose.ui.unit.dp
 import com.example.huellitas.ui.theme.GradientEnd
 import com.example.huellitas.ui.theme.GradientStart
 import com.example.huellitas.ui.theme.HuellitasTheme
-
-/** Credenciales de administrador (hardcoded para demo) */
-private const val ADMIN_CORREO = "admin@gmail.com"
-private const val ADMIN_CONTRASENA = "admin"
+import com.example.huellitas.viewmodel.AuthViewModel
+import com.example.huellitas.viewmodel.EstadoAuth
 
 /**
  * Pantalla de inicio de sesión del panel de administración.
  *
- * Valida credenciales contra valores fijos de demostración.
- * En producción, esto debería conectarse a un endpoint seguro.
+ * Valida credenciales contra el backend PHP.
  *
  * @param alIniciarSesion Callback al autenticarse correctamente
  * @param alVolver Callback para regresar al feed principal
+ * @param alIrARegistro Callback para navegar a la pantalla de registro
+ * @param authViewModel ViewModel compartido de autenticación
  */
 @Composable
 fun PantallaLoginAdmin(
     alIniciarSesion: () -> Unit,
-    alVolver: () -> Unit
+    alVolver: () -> Unit,
+    alIrARegistro: () -> Unit = {},
+    authViewModel: AuthViewModel
 ) {
     var correo by remember { mutableStateOf("") }
     var contrasena by remember { mutableStateOf("") }
     var mensajeError by remember { mutableStateOf<String?>(null) }
+
+    // Desactivar Force Dark del sistema (Xiaomi/MIUI) a nivel de View
+    LocalView.current.setForceDarkAllowed(false)
+
+    val estadoAuth by authViewModel.estado.collectAsState()
+
+    // Colores forzados para inputs (evita que el modo oscuro los sobreescriba)
+    val coloresInput = OutlinedTextFieldDefaults.colors(
+        focusedTextColor = GradientStart,
+        unfocusedTextColor = GradientStart,
+        cursorColor = GradientStart,
+        focusedBorderColor = GradientStart,
+        unfocusedBorderColor = Color(0xFFCAC4D0),
+        focusedContainerColor = Color(0xFFFAF5FF),
+        unfocusedContainerColor = Color(0xFFFAF5FF),
+        focusedPlaceholderColor = Color(0xFFB39DDB),
+        unfocusedPlaceholderColor = Color(0xFFB39DDB),
+        focusedLeadingIconColor = GradientStart,
+        unfocusedLeadingIconColor = GradientStart
+    )
+
+    // Reaccionar a cambios de estado
+    LaunchedEffect(estadoAuth) {
+        when (estadoAuth) {
+            is EstadoAuth.Exito -> {
+                authViewModel.resetearEstado()
+                alIniciarSesion()
+            }
+            is EstadoAuth.Error -> {
+                mensajeError = (estadoAuth as EstadoAuth.Error).mensaje
+            }
+            else -> {}
+        }
+    }
 
     Box(
         modifier = Modifier
@@ -130,8 +170,10 @@ fun PantallaLoginAdmin(
                             correo = it
                             mensajeError = null
                         },
-                        modifier = Modifier.fillMaxWidth(),
-                        placeholder = { Text("Ingresa tu correo") },
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .background(Color(0xFFFAF5FF), RoundedCornerShape(12.dp)),
+                        placeholder = { Text("Ingresa tu correo", color = Color(0xFF8A7A9E)) },
                         leadingIcon = {
                             Icon(
                                 imageVector = Icons.Outlined.Person,
@@ -139,13 +181,11 @@ fun PantallaLoginAdmin(
                                 tint = GradientStart
                             )
                         },
+                        textStyle = LocalTextStyle.current.copy(color = GradientStart),
                         shape = RoundedCornerShape(12.dp),
                         singleLine = true,
                         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email),
-                        colors = OutlinedTextFieldDefaults.colors(
-                            focusedBorderColor = GradientStart,
-                            unfocusedBorderColor = Color(0xFFCAC4D0)
-                        )
+                        colors = coloresInput
                     )
 
                     // ── Campo: Contraseña ──
@@ -161,8 +201,10 @@ fun PantallaLoginAdmin(
                             contrasena = it
                             mensajeError = null
                         },
-                        modifier = Modifier.fillMaxWidth(),
-                        placeholder = { Text("Ingresa tu contraseña") },
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .background(Color(0xFFFAF5FF), RoundedCornerShape(12.dp)),
+                        placeholder = { Text("Ingresa tu contraseña", color = Color(0xFF8A7A9E)) },
                         leadingIcon = {
                             Icon(
                                 imageVector = Icons.Outlined.Lock,
@@ -170,35 +212,41 @@ fun PantallaLoginAdmin(
                                 tint = GradientStart
                             )
                         },
+                        textStyle = LocalTextStyle.current.copy(color = GradientStart),
                         shape = RoundedCornerShape(12.dp),
                         singleLine = true,
                         visualTransformation = PasswordVisualTransformation(),
                         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
-                        colors = OutlinedTextFieldDefaults.colors(
-                            focusedBorderColor = GradientStart,
-                            unfocusedBorderColor = Color(0xFFCAC4D0)
-                        )
+                        colors = coloresInput
                     )
 
                     // ── Mensaje de error ──
                     if (mensajeError != null) {
-                        Text(
-                            text = mensajeError!!,
-                            style = MaterialTheme.typography.bodySmall,
-                            color = MaterialTheme.colorScheme.error,
-                            textAlign = TextAlign.Center,
-                            modifier = Modifier.fillMaxWidth()
-                        )
+                        Card(
+                            modifier = Modifier.fillMaxWidth(),
+                            shape = RoundedCornerShape(12.dp),
+                            colors = CardDefaults.cardColors(
+                                containerColor = Color(0xFFFFEBEE)
+                            )
+                        ) {
+                            Text(
+                                text = "⚠\uFE0F ${ mensajeError }",
+                                style = MaterialTheme.typography.bodyMedium,
+                                fontWeight = FontWeight.SemiBold,
+                                color = Color(0xFFB71C1C),
+                                textAlign = TextAlign.Center,
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(12.dp)
+                            )
+                        }
                     }
 
                     // ── Botón Iniciar sesión ──
                     Button(
                         onClick = {
-                            if (correo.trim() == ADMIN_CORREO && contrasena == ADMIN_CONTRASENA) {
-                                alIniciarSesion()
-                            } else {
-                                mensajeError = "Credenciales incorrectas"
-                            }
+                            mensajeError = null
+                            authViewModel.login(correo.trim(), contrasena)
                         },
                         modifier = Modifier
                             .fillMaxWidth()
@@ -206,25 +254,39 @@ fun PantallaLoginAdmin(
                         shape = RoundedCornerShape(12.dp),
                         colors = ButtonDefaults.buttonColors(
                             containerColor = GradientStart,
-                            contentColor = Color.White
+                            contentColor = Color.White,
+                            disabledContainerColor = GradientStart.copy(alpha = 0.6f),
+                            disabledContentColor = Color.White.copy(alpha = 0.8f)
                         ),
                         enabled = correo.isNotBlank() && contrasena.isNotBlank()
+                                && estadoAuth !is EstadoAuth.Cargando
                     ) {
-                        Text(
-                            text = "Iniciar sesión",
-                            fontWeight = FontWeight.Bold,
-                            style = MaterialTheme.typography.titleMedium
-                        )
+                        if (estadoAuth is EstadoAuth.Cargando) {
+                            CircularProgressIndicator(
+                                modifier = Modifier.size(24.dp),
+                                color = Color.White,
+                                strokeWidth = 2.dp
+                            )
+                        } else {
+                            Text(
+                                text = "Iniciar sesión",
+                                fontWeight = FontWeight.Bold,
+                                style = MaterialTheme.typography.titleMedium
+                            )
+                        }
                     }
 
-                    // ── Pista de credenciales ──
-                    Text(
-                        text = "\uD83D\uDCA1 Correo por defecto: admin@gmail.com\nContraseña: admin",
-                        style = MaterialTheme.typography.bodySmall,
-                        color = Color(0xFF49454F),
-                        textAlign = TextAlign.Center,
+                    // ── Link a registro ──
+                    TextButton(
+                        onClick = alIrARegistro,
                         modifier = Modifier.fillMaxWidth()
-                    )
+                    ) {
+                        Text(
+                            text = "¿No tienes cuenta? Regístrate",
+                            color = GradientStart,
+                            fontWeight = FontWeight.SemiBold
+                        )
+                    }
                 }
             }
 
@@ -246,6 +308,11 @@ fun PantallaLoginAdmin(
 @Composable
 private fun PantallaLoginAdminPreview() {
     HuellitasTheme {
-        PantallaLoginAdmin(alIniciarSesion = {}, alVolver = {})
+        PantallaLoginAdmin(
+            alIniciarSesion = {},
+            alVolver = {},
+            alIrARegistro = {},
+            authViewModel = AuthViewModel()
+        )
     }
 }

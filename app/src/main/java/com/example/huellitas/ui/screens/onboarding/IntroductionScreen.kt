@@ -14,7 +14,7 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Favorite
-import androidx.compose.material.icons.outlined.List
+import androidx.compose.material.icons.automirrored.outlined.List
 import androidx.compose.material.icons.outlined.Pets
 import androidx.compose.material.icons.outlined.PostAdd
 import androidx.compose.material.icons.outlined.Share
@@ -137,7 +137,7 @@ fun PantallaIntroduccion(
                 shape = MaterialTheme.shapes.large
             ) {
                 Icon(
-                    imageVector = Icons.Outlined.List,
+                    imageVector = Icons.AutoMirrored.Outlined.List,
                     contentDescription = null,
                     modifier = Modifier.size(20.dp)
                 )

@@ -14,6 +14,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import com.example.huellitas.ui.screens.admin.PantallaAdminPanel
 import com.example.huellitas.ui.screens.admin.PantallaLoginAdmin
+import com.example.huellitas.ui.screens.admin.PantallaRegistroUsuario
 import com.example.huellitas.ui.screens.admin.PantallaTutorialAdmin
 import com.example.huellitas.ui.screens.home.PantallaListaAnimales
 import com.example.huellitas.ui.screens.onboarding.PantallaBienvenida
@@ -22,6 +23,7 @@ import com.example.huellitas.ui.screens.onboarding.PantallaTutorial
 import com.example.huellitas.ui.screens.registration.PantallaRegistroAnimal
 import com.example.huellitas.ui.screens.splash.PantallaCarga
 import com.example.huellitas.viewmodel.AnimalListViewModel
+import com.example.huellitas.viewmodel.AuthViewModel
 
 private const val DURACION_ANIMACION = 400
 
@@ -48,6 +50,9 @@ fun NavHostHuellitas(
     // ViewModel compartido: la pantalla de lista y el callback de registro
     // comparten la misma instancia para que al registrar se recargue la lista.
     val listViewModel: AnimalListViewModel = viewModel()
+
+    // ViewModel compartido para autenticación (login y registro)
+    val authViewModel: AuthViewModel = viewModel()
 
     // Estado para controlar si ya se vio el tutorial de admin
     val tutorialAdminVisto = rememberSaveable { mutableStateOf(false) }
@@ -172,7 +177,31 @@ fun NavHostHuellitas(
                         }
                     }
                 },
-                alVolver = { controladorNav.popBackStack() }
+                alVolver = { controladorNav.popBackStack() },
+                alIrARegistro = {
+                    controladorNav.navigate(Rutas.ADMIN_REGISTRO)
+                },
+                authViewModel = authViewModel
+            )
+        }
+
+        composable(Rutas.ADMIN_REGISTRO) {
+            PantallaRegistroUsuario(
+                alRegistroExitoso = {
+                    if (!tutorialAdminVisto.value) {
+                        controladorNav.navigate(Rutas.ADMIN_TUTORIAL) {
+                            popUpTo(Rutas.ADMIN_LOGIN) { inclusive = true }
+                        }
+                    } else {
+                        controladorNav.navigate(Rutas.ADMIN_PANEL) {
+                            popUpTo(Rutas.ADMIN_LOGIN) { inclusive = true }
+                        }
+                    }
+                },
+                alIrALogin = {
+                    controladorNav.popBackStack()
+                },
+                authViewModel = authViewModel
             )
         }
 

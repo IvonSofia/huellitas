@@ -4,7 +4,6 @@ import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
-import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
@@ -75,12 +74,7 @@ import kotlinx.coroutines.delay
 @Composable
 fun PantallaBienvenida(alSiguiente: () -> Unit) {
 
-    val esModoOscuro = isSystemInDarkTheme()
-    val coloresGradiente = if (esModoOscuro) {
-        listOf(GradientDarkStart, GradientDarkEnd)
-    } else {
-        listOf(GradientStart, GradientEnd)
-    }
+    val coloresGradiente = listOf(GradientStart, GradientEnd)
 
     // ── Animaciones de entrada escalonada ──
     var logoVisible by remember { mutableStateOf(false) }
@@ -290,7 +284,7 @@ private fun PantallaBienvenidaPreview() {
 )
 @Composable
 private fun PantallaBienvenidaOscuraPreview() {
-    HuellitasTheme(darkTheme = true) {
+    HuellitasTheme {
         PantallaBienvenida(alSiguiente = {})
     }
 }
